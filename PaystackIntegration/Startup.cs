@@ -35,7 +35,9 @@ namespace PaystackIntegration
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySQL(Configuration.GetConnectionString("ConnectionContext")));
-            services.AddControllers();
+            //services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(x =>
+ x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaystackIntegration", Version = "v1" });

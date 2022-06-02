@@ -79,6 +79,7 @@ namespace PaystackIntegration.Implementations.Sevices
 
         public async Task<HttpResponseMessage> InitializePaystackPayment(OrderDto orderDto)
         {
+            var curl_url = $"{_config["Api:Url"]}api/v1/payment/{orderDto.Reference}";
             var model = new PaystackPayRequestModel
             {
                 email = orderDto.CustomerEmail,
@@ -88,7 +89,7 @@ namespace PaystackIntegration.Implementations.Sevices
                 phoneNumber = orderDto.CustomerPhone,
                 fullName = orderDto.CustomerName,
                 label = orderDto.CustomerName,
-                callback = $"{_config["Api:Url"]}api/v1/payment/{orderDto.Reference}"
+                callback = curl_url
             };
 
             var url = $"https://api.paystack.co/transaction/initialize";
@@ -98,8 +99,8 @@ namespace PaystackIntegration.Implementations.Sevices
             {
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
 
-                var payload = JsonConvert.SerializeObject(model);
-                //var payload = System.Text.Json.JsonSerializer.Serialize(model);
+                //var payload = JsonConvert.SerializeObject(model);
+                var payload = System.Text.Json.JsonSerializer.Serialize(model);
 
                 requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await _client.SendAsync(requestMessage);

@@ -10,7 +10,7 @@ namespace PaystackIntegration.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class PaymentController : Controller
+    public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
         public PaymentController(IPaymentService paymentService)
