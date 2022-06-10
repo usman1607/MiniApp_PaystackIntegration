@@ -19,20 +19,21 @@ namespace PaystackIntegration.Controllers
         }
 
         [HttpPost("checkout")]
-        public IActionResult Checkout([FromBody] CreateOrderRequestModel model)
+        public async Task<IActionResult> Checkout([FromBody] CreateOrderRequestModel model)
         {
             if (ModelState.IsValid)
             {
-                return Ok(_paymentService.CheckOut(model));
+                var response = await _paymentService.CheckOut(model);
+                return Ok(response);
             }
 
             return NoContent();
         }
 
         [HttpGet("{reference}")]
-        public IActionResult VerifyPayment([FromRoute] string reference)
+        public async Task<IActionResult> VerifyPayment([FromRoute] string reference)
         {
-            return Ok(_paymentService.VerifyPayment(reference));
+            return Ok(await _paymentService.VerifyPayment(reference));
         }
     }
 }

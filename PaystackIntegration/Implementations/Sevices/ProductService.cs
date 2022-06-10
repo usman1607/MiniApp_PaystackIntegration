@@ -34,7 +34,7 @@ namespace PaystackIntegration.Implementations.Sevices
 
             if (model.file != null)
             {
-                /*string imageDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "productImages");
+                string imageDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "productImages");
                 Directory.CreateDirectory(imageDirectory);
                 string contentType = model.file.ContentType.Split('/')[1];
                 string imageUrl = $"{Guid.NewGuid()}.{contentType}";
@@ -43,7 +43,7 @@ namespace PaystackIntegration.Implementations.Sevices
                 {
                     model.file.CopyTo(fileStream);
                 }
-                product.ImageUrl = imageUrl;*/
+                product.ImageUrl = imageUrl;
             }
 
             return _productRepository.Create(product);

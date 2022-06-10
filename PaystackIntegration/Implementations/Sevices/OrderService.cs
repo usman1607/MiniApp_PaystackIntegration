@@ -14,64 +14,16 @@ namespace PaystackIntegration.Implementations.Sevices
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IProductRepository _productRepository;
-        private readonly ICustomerRepository _customerRepository;
 
-        public OrderService(IOrderRepository orderRepository /*, IProductRepository productRepository, ICustomerRepository customerRepository, IPaymentService paymentService*/)
+        public OrderService(IOrderRepository orderRepository)
         {
-            //_paymentService = paymentService;
             _orderRepository = orderRepository;
-            //_productRepository = productRepository;
-            //_customerRepository = customerRepository;
         }
 
         public async Task<OrderDto> CreateOrder(Order order)
         {
             return await _orderRepository.Create(order);
         }
-
-        /* public async Task<OrderDto> CheckOut(CreateOrderRequestModel model)
-         {
-             var productDictionary = model.orderProducts.ToDictionary(o => o.ProductId);
-             var products = _productRepository.GetOrderProducts(productDictionary.Keys);
-
-             var customer = _customerRepository.Find(model.CustomerId);
-             var order = new Order
-             {
-                 Customer = customer,
-                 CustomerId = model.CustomerId,
-                 Date = DateTime.UtcNow,
-                 DeliveryAddress = model.DeliveryAddress,
-                 Reference = Guid.NewGuid().ToString().Substring(0, 10).Replace("-", "").ToUpper(),
-                 Status = OrderStatus.Default
-             };
-             foreach(var product in products)
-             {
-                 var quantity = productDictionary[product.Id].Quantity;
-                 var orderProduct = new OrderProduct
-                 {
-                     ProductId = product.Id,
-                     Product = product,
-                     Order = order,
-                     OrderId = order.Id,
-                     Quantity = quantity,
-                     UnitPrice = product.Price
-                 };
-                 order.TotalPrice += product.Price * quantity;
-                 order.OrderProducts.Add(orderProduct);
-             }
-
-             var orderDto = _orderRepository.Create(order);
-             var response = await _paymentService.InitializePaystackPayment(orderDto);
-
-             if (response.StatusCode == HttpStatusCode.OK)
-             {
-                 order.Status = OrderStatus.InProgress;
-                 _orderRepository.Update(order);
-             }
-
-             return orderDto;
-         }*/
 
         public Order Find(int id)
         {

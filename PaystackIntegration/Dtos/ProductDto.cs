@@ -25,7 +25,7 @@ namespace PaystackIntegration.Dtos
 
         public decimal Price { get; set; }
 
-        public string file { get; set; }
+        public IFormFile file { get; set; }
 
         public string Description { get; set; }
     }

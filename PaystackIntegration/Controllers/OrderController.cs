@@ -18,17 +18,6 @@ namespace PaystackIntegration.Controllers
             _orderService = orderService;
         }
 
-        /*[HttpPost("checkout")]
-        public IActionResult Checkout([FromBody] CreateOrderRequestModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                return Ok(_orderService.CheckOut(model));
-            }
-
-            return NoContent();
-        }*/
-
         [HttpGet("{reference}")]
         public async Task<IActionResult> GetByReference([FromRoute] string reference)
         {

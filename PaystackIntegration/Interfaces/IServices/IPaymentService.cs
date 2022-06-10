@@ -10,7 +10,7 @@ namespace PaystackIntegration.Interfaces.IServices
 {
     public interface IPaymentService
     {
-        public Task<OrderDto> CheckOut(CreateOrderRequestModel model);
+        public Task<CheckoutResponse> CheckOut(CreateOrderRequestModel model);
 
         public Task<HttpResponseMessage> InitializePaystackPayment(OrderDto orderDto);
 

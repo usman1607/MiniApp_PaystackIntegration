@@ -288,7 +288,7 @@ namespace PaystackIntegration.Implementations.Repositories
 
         public async Task<Order> FindByReference(string reference)
         {
-            return await _context.Orders.Where(o => o.Reference == reference)
+            return await _context.Orders.Where(o => o.Reference == reference).Include(o => o.Customer)
                 .SingleOrDefaultAsync();
         }
     }

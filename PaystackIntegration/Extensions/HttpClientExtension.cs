@@ -14,7 +14,7 @@ namespace PaystackIntegration.Extensions
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception("Ann Error occoured");
+                throw new Exception($"Ann Error occoured: {response.ReasonPhrase}");
             }
             var dataAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 

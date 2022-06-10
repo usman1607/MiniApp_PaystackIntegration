@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using PaystackIntegration.Dtos;
 using PaystackIntegration.Enums;
 using PaystackIntegration.Extensions;
-using PaystackIntegration.Interfaces.IRepositories;
 using PaystackIntegration.Interfaces.IServices;
 using PaystackIntegration.Models.Entities;
 using System;
@@ -34,7 +33,7 @@ namespace PaystackIntegration.Implementations.Sevices
             _customerService = customerService;
         }
 
-        public async Task<OrderDto> CheckOut(CreateOrderRequestModel model)
+        public async Task<CheckoutResponse> CheckOut(CreateOrderRequestModel model)
         {
             var productDictionary = model.orderProducts.ToDictionary(o => o.ProductId);
             var products = await _productService.GetAllSelectedProducts(productDictionary.Keys);
@@ -71,21 +70,46 @@ namespace PaystackIntegration.Implementations.Sevices
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                //return Payment not completed error...
+                return new CheckoutResponse
+                {
+                    Status = false,
+                    Message = response.ReasonPhrase
+                };
             }
+            else
+            {
+                var checkoutResponse = await response.ReadContentAs<PaystackResponse>();
 
-            return orderDto;
+                if (checkoutResponse.Status)
+                {
+                    return new CheckoutResponse
+                    {
+                        Status = true,
+                        Message = checkoutResponse.Message,
+                        PaymentUrl = checkoutResponse.Data.Authorization_url
+                    };
+                    
+                }
+                else
+                {
+                    return new CheckoutResponse
+                    {
+                        Status = false,
+                        Message = checkoutResponse.Message,
+                    };
+                }
+            }
         }
 
         public async Task<HttpResponseMessage> InitializePaystackPayment(OrderDto orderDto)
         {
-            var curl_url = $"{_config["Api:Url"]}api/v1/payment/{orderDto.Reference}";
+            var curl_url = $"{_config["Api:Url"]}api/v1/Payment/{orderDto.Reference}";
             var model = new PaystackPayRequestModel
             {
                 email = orderDto.CustomerEmail,
                 amount = orderDto.TotalPrice * 100,
                 reference = orderDto.Reference,
-                //metadata = orderDto.OrderProducts,
+                metadata = orderDto.OrderProducts,
                 phoneNumber = orderDto.CustomerPhone,
                 fullName = orderDto.CustomerName,
                 label = orderDto.CustomerName,
@@ -99,8 +123,7 @@ namespace PaystackIntegration.Implementations.Sevices
             {
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
 
-                //var payload = JsonConvert.SerializeObject(model);
-                var payload = System.Text.Json.JsonSerializer.Serialize(model);
+                var payload = JsonConvert.SerializeObject(model);
 
                 requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await _client.SendAsync(requestMessage);
@@ -119,7 +142,7 @@ namespace PaystackIntegration.Implementations.Sevices
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
                 var response = await _client.SendAsync(request);
-                var responseModel = await response.ReadContentAs<PaystackResponse>();
+                var responseModel = await response.ReadContentAs<PaystackVerificationResponse>();
 
                 if (responseModel.Status)
                 {
@@ -127,7 +150,7 @@ namespace PaystackIntegration.Implementations.Sevices
 
                     order.Status = OrderStatus.InProgress;
                     order.Paid = true;
-                    order.PaidAt = DateTime.Parse(responseModel.Paid_At);
+                    order.PaidAt = DateTime.Parse(responseModel.Data.Paid_At);
 
                     _orderService.UpdateOrder(order);
 
@@ -136,9 +159,10 @@ namespace PaystackIntegration.Implementations.Sevices
                         CustomerId = order.CustomerId,
                         CustomerName = $"{order.Customer.FirstName} {order.Customer.LastName}",
                         Reference = order.Reference,
+                        OrderReference = order.Reference,
                         Amount = order.TotalPrice,
                         Date = order.PaidAt,
-                        OrderId = order.Id
+                        //OrderId = order.Id
                     };
                 }
             }
